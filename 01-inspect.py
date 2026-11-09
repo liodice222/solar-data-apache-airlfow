@@ -30,11 +30,51 @@ for name, filename in files.items():
 
 #exploratory check 
 
-print("\n--- exploratory check ---")
-for name, df in dataframes.items():
-    print(f"\n--- {name} nulls---")
-    print(df.isnull().sum())
-    print(f"\n--- {name} duplicates---")
-    print(df.duplicated().sum())
+# print("\n--- exploratory check ---")
+# for name, df in dataframes.items():
+#     print(f"\n--- {name} nulls---")
+#     print(df.isnull().sum())
+#     print(f"\n--- {name} duplicates---")
+#     print(df.duplicated().sum())
 
 #understand time series data
+# for name, df in dataframes.items():
+#     df["DATE_TIME"] = pd.to_datetime(
+#         df["DATE_TIME"],
+#         dayfirst=True
+#     )
+
+#     print(f"\n--- {name} ---")
+#     print("Start:", df["DATE_TIME"].min())
+#     print("End:", df["DATE_TIME"].max())
+#     print("Unique timestamps:", df["DATE_TIME"].nunique())
+
+#find how many timestamps per inverter
+df = dataframes["plant_1_generation"]
+print("total readings per ts")
+readings_per_timestamp = (
+    df.groupby("DATE_TIME")
+    #total number of rows at this timestamp, doesnt check for uniqueness
+    .size()
+)
+
+print(readings_per_timestamp.head(10))
+
+#find unique inverters
+print("Unique inverters:", df["SOURCE_KEY"].nunique())
+print("unique inverters per ts")
+inverters_per_timestamp = (
+    df.groupby("DATE_TIME")["SOURCE_KEY"]
+    #check actual unique inverters at timestamp
+    .nunique()
+)
+
+print(inverters_per_timestamp.head(10))
+
+#check duplicates on combination of timestamp and source key 
+duplicate_readings = df.duplicated(
+    subset=["DATE_TIME", "SOURCE_KEY"]
+)
+
+print("Duplicate inverter/timestamp records:", duplicate_readings.sum())
+
