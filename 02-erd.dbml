@@ -1,0 +1,54 @@
+//erd 
+Table plant {
+  plant_id integer [pk, not null]
+}
+
+Table inverter {
+  plant_id integer [not null]
+  source_key varchar(64) [not null, note: 'SOURCE_KEY from the generation CSV']
+
+  indexes {
+    (plant_id, source_key) [pk]
+  }
+}
+
+Table weather_sensor {
+  plant_id integer [not null]
+  source_key varchar(64) [not null, note: 'SOURCE_KEY from the weather CSV']
+
+  indexes {
+    (plant_id, source_key) [pk]
+  }
+}
+
+Table generation_reading {
+  plant_id integer [not null]
+  inverter_source_key varchar(64) [not null]
+  date_time timestamp [not null]
+  dc_power numeric
+  ac_power numeric
+  daily_yield numeric
+  total_yield numeric
+
+  indexes {
+    (plant_id, inverter_source_key, date_time) [pk]
+  }
+}
+
+Table weather_reading {
+  plant_id integer [not null]
+  sensor_source_key varchar(64) [not null]
+  date_time timestamp [not null]
+  ambient_temperature numeric
+  module_temperature numeric
+  irradiation numeric
+
+  indexes {
+    (plant_id, sensor_source_key, date_time) [pk]
+  }
+}
+
+Ref: plant.plant_id < inverter.plant_id
+Ref: plant.plant_id < weather_sensor.plant_id
+Ref: generation_reading.(plant_id, inverter_source_key) > inverter.(plant_id, source_key)
+Ref: weather_reading.(plant_id, sensor_source_key) > weather_sensor.(plant_id, source_key)

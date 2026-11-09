@@ -20,37 +20,37 @@ for name, filename in files.items():
     dataframes[name] = pd.read_csv(file_path)
 
 # inspect each df
-# for name, df in dataframes.items():
-#     print(f"\n--- {name} ---")
-#     print(f"Rows: {df.shape[0]}, Columns: {df.shape[1]}")
-#     print("\nColumn types:")
-#     print(df.dtypes)
-#     print(df.head())
+for name, df in dataframes.items():
+    print(f"\n--- {name} ---")
+    print(f"Rows: {df.shape[0]}, Columns: {df.shape[1]}")
+    print("\nColumn types:")
+    print(df.dtypes)
+    print(df.head())
 
 
 #exploratory check 
 
 # print("\n--- exploratory check ---")
-# for name, df in dataframes.items():
-#     print(f"\n--- {name} nulls---")
-#     print(df.isnull().sum())
-#     print(f"\n--- {name} duplicates---")
-#     print(df.duplicated().sum())
+for name, df in dataframes.items():
+    print(f"\n--- {name} nulls---")
+    print(df.isnull().sum())
+    print(f"\n--- {name} duplicates---")
+    print(df.duplicated().sum())
 
 #understand time series data
-# for name, df in dataframes.items():
-#     df["DATE_TIME"] = pd.to_datetime(
-#         df["DATE_TIME"],
-#         dayfirst=True
-#     )
+for name, df in dataframes.items():
+    df["DATE_TIME"] = pd.to_datetime(
+        df["DATE_TIME"],
+        dayfirst=True
+    )
 
-#     print(f"\n--- {name} ---")
-#     print("Start:", df["DATE_TIME"].min())
-#     print("End:", df["DATE_TIME"].max())
-#     print("Unique timestamps:", df["DATE_TIME"].nunique())
+    print(f"\n--- {name} ---")
+    print("Start:", df["DATE_TIME"].min())
+    print("End:", df["DATE_TIME"].max())
+    print("Unique timestamps:", df["DATE_TIME"].nunique())
 
 #find how many timestamps per inverter
-df = dataframes["plant_1_generation"]
+df = dataframes["plant_1_weather"]
 print("total readings per ts")
 readings_per_timestamp = (
     df.groupby("DATE_TIME")
@@ -78,3 +78,18 @@ duplicate_readings = df.duplicated(
 
 print("Duplicate inverter/timestamp records:", duplicate_readings.sum())
 
+#verify count of inverters for plant generation data
+for name in ["plant_1_generation", "plant_2_generation"]:
+    df = dataframes[name]
+
+    print(f"\n{name}")
+    print("Number of inverters:", df["SOURCE_KEY"].nunique())
+    print("Inverter IDs:", df["SOURCE_KEY"].unique())
+
+    #verify count of inverters for weather sensor data
+for name in ["plant_1_weather", "plant_2_weather"]:
+    df = dataframes[name]
+
+    print(f"\n{name}")
+    print("Number of inverters:", df["SOURCE_KEY"].nunique())
+    print("Inverter IDs:", df["SOURCE_KEY"].unique())
