@@ -1,3 +1,4 @@
 data/
 logs/
 .env
+dags/__pycache__
