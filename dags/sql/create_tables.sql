@@ -39,3 +39,9 @@ CREATE TABLE IF NOT EXISTS weather_reading (
     FOREIGN KEY (plant_id, sensor_source_key)
         REFERENCES weather_sensor(plant_id, source_key)
 );
+
+-- add table to track ingestion 
+CREATE TABLE IF NOT EXISTS ingestion (
+    pipeline_name VARCHAR(100) PRIMARY KEY,
+    last_loaded_date DATE NOT NULL
+);
