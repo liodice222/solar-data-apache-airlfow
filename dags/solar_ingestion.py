@@ -28,6 +28,7 @@ REQUIRED_FILES = [
 @dag(
     dag_id="solar_ingestion_dag",
     description="test data source files",
+    # minute / hour / day of month / month / day of week
     schedule=None,
     catchup=False,
     tags=["solar", "ingestion"],
@@ -190,7 +191,7 @@ def solar_ingestion():
 
         logger.info("Processed %s weather sensors", len(equipment))
 
-    @task
+    @task 
     def load_daily_readings():
         hook = PostgresHook(postgres_conn_id="solar_data")
 
@@ -245,7 +246,7 @@ def solar_ingestion():
                     # Initialize progress to the day BEFORE the first load.
                     cursor.execute(
                         """
-                        INSERT INTO ingestion_watermark (
+                        INSERT INTO ingestion (
                             pipeline_name, last_loaded_date
                         )
                         VALUES (%s, %s)
@@ -258,7 +259,7 @@ def solar_ingestion():
                     cursor.execute(
                         """
                         SELECT last_loaded_date
-                        FROM ingestion_watermark
+                        FROM ingestion
                         WHERE pipeline_name = %s
                         FOR UPDATE
                         """,
@@ -342,7 +343,7 @@ def solar_ingestion():
                     # Update the watermark in the SAME transaction.
                     cursor.execute(
                         """
-                        UPDATE ingestion_watermark
+                        UPDATE ingestion
                         SET last_loaded_date = %s
                         WHERE pipeline_name = %s
                         """,
@@ -367,11 +368,15 @@ def solar_ingestion():
     )
     #load plant ids to plant db
     plants = load_plants()
+    #extract unique plant id, source key combos and insert to inverter/weather table 
     inverters = load_inverters()
     weather_sensors = load_weather_sensors()
+    #read ingestion tables, then load daily reading 
     daily_readings = load_daily_readings()
 
+    #sequential dependencies for tasks in dag
     file_check >> validation >> create_tables >> plants
+    #parallel dependencies
     plants >> [inverters, weather_sensors]
     [inverters, weather_sensors] >> daily_readings
 
